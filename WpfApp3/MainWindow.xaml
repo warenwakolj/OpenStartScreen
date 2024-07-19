@@ -1,0 +1,24 @@
+﻿<Window x:Class="OpenStartScreen.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="480" Width="640">
+    <ScrollViewer VerticalScrollBarVisibility="Hidden" Name="scrollViewer">
+        <StackPanel Name="stackPanel">
+            <Grid Height="{Binding ElementName=scrollViewer, Path=ViewportHeight}" Background="AliceBlue">
+                <TextBlock Text="Start" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Margin="46,34,0,0" />
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,73,0,10">
+                    <WrapPanel x:Name="GridsPanel" Orientation="Horizontal" AllowDrop="True" Drop="GridsPanel_Drop" DragOver="GridsPanel_DragOver" />
+                </ScrollViewer>
+                <Button Content="↓" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="46,0,0,20" Click="GoToApps_Click"/>
+            </Grid>
+
+            <Grid Height="{Binding ElementName=scrollViewer, Path=ViewportHeight}" Background="AliceBlue">
+                <TextBlock Text="Apps" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Margin="46,34,0,0"/>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,95,0,52" Grid.ColumnSpan="5">
+                    <WrapPanel x:Name="CategoriesPanel" Orientation="Horizontal"/>
+                </ScrollViewer>
+                <Button Content="↑" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="46,0,0,20" Click="GoToStart_Click"/>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
