@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Down.png" />
+    <None Remove="Up.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <COMReference Include="IWshRuntimeLibrary">
       <WrapperTool>tlbimp</WrapperTool>
       <VersionMinor>0</VersionMinor>
@@ -22,6 +27,11 @@
 
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Down.png" />
+    <Resource Include="Up.png" />
   </ItemGroup>
 
 </Project>

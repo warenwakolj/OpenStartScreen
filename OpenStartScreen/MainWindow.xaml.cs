@@ -34,13 +34,13 @@ namespace OpenStartScreen
         private void GoToApps_Click(object sender, RoutedEventArgs e)
         {
             double newOffset = scrollViewer.VerticalOffset + scrollViewer.ViewportHeight;
-            AnimateScrollViewer(scrollViewer, newOffset, TimeSpan.FromSeconds(0.5));
+            AnimateScrollViewer(scrollViewer, newOffset, TimeSpan.FromSeconds(1));
         }
 
         private void GoToStart_Click(object sender, RoutedEventArgs e)
         {
             double newOffset = scrollViewer.VerticalOffset - scrollViewer.ViewportHeight;
-            AnimateScrollViewer(scrollViewer, newOffset, TimeSpan.FromSeconds(0.5));
+            AnimateScrollViewer(scrollViewer, newOffset, TimeSpan.FromSeconds(1));
         }
 
         private void AnimateScrollViewer(ScrollViewer scrollViewer, double toValue, TimeSpan duration)
@@ -170,16 +170,30 @@ namespace OpenStartScreen
                 return FindParent<T>(parentObject);
         }
 
+        private bool isFirstGridAdded = false;
+
         private void AddTileToGrid(Tile tile)
         {
             UniformGrid lastGrid = GridsPanel.Children.OfType<UniformGrid>().LastOrDefault();
             if (lastGrid == null || lastGrid.Children.Count >= lastGrid.Columns * lastGrid.Rows)
             {
-                lastGrid = new UniformGrid { Columns = 2, Rows = 4, Margin = new Thickness(10) };
+                lastGrid = new UniformGrid { Columns = 2, Rows = 4 };
+
+                if (!isFirstGridAdded)
+                {
+                    lastGrid.Margin = new Thickness(120, 10, 10, 10); // Larger top margin for the first grid
+                    isFirstGridAdded = true;
+                }
+                else
+                {
+                    lastGrid.Margin = new Thickness(10); // Default margin for subsequent grids
+                }
+
                 GridsPanel.Children.Add(lastGrid);
             }
             lastGrid.Children.Add(tile);
         }
+
 
         private void LoadStartMenuItems()
         {
