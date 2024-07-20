@@ -69,7 +69,7 @@ namespace OpenStartScreen
             }
         }
         private const string StartMenuPath = @"C:\ProgramData\Microsoft\Windows\Start Menu\Programs";
-        private const string PinnedStartMenuPath = @"C:\Users\User\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\User Pinned\StartMenu";
+        private static string PinnedStartMenuPath = Environment.ExpandEnvironmentVariables(@"%AppData%\Microsoft\Internet Explorer\Quick Launch\User Pinned\StartMenu");
 
         private void GridsPanel_Drop(object sender, DragEventArgs e)
         {
