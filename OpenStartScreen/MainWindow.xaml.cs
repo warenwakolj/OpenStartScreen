@@ -21,15 +21,16 @@ namespace OpenStartScreen
         private TimeSpan animationDuration;
 
         public MainWindow()
-        {
-            InitializeComponent();
-            LoadStartMenuItems();
-            LoadPinnedItems();
-            this.WindowState = WindowState.Maximized;
-            GridsPanel.AllowDrop = true;
-            GridsPanel.Drop += GridsPanel_Drop;
-            GridsPanel.DragOver += GridsPanel_DragOver;
-        }
+ {
+        InitializeComponent();
+        LoadStartMenuItems();
+        LoadPinnedItems();
+        this.WindowState = WindowState.Maximized;
+        GridsPanel.AllowDrop = true;
+        GridsPanel.Drop += GridsPanel_Drop;
+        DataContext = new UserCard();  
+        GridsPanel.DragOver += GridsPanel_DragOver;
+    }
 
         private void GoToApps_Click(object sender, RoutedEventArgs e)
         {
@@ -181,12 +182,12 @@ namespace OpenStartScreen
 
                 if (!isFirstGridAdded)
                 {
-                    lastGrid.Margin = new Thickness(120, 10, 10, 10); // Larger top margin for the first grid
+                    lastGrid.Margin = new Thickness(120, 10, 10, 10);
                     isFirstGridAdded = true;
                 }
                 else
                 {
-                    lastGrid.Margin = new Thickness(10); // Default margin for subsequent grids
+                    lastGrid.Margin = new Thickness(10);
                 }
 
                 GridsPanel.Children.Add(lastGrid);
