@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -299,8 +299,11 @@ namespace OpenStartScreen
             var textBlock = new TextBlock
             {
                 Text = categoryName,
+                Foreground = Brushes.White,
                 VerticalAlignment = VerticalAlignment.Center,
-                FontWeight = FontWeights.Bold
+                TextAlignment = TextAlignment.Left,
+                FontSize = 16,
+                Opacity = 0.25,
             };
             stackPanel.Children.Add(textBlock);
 
@@ -308,9 +311,10 @@ namespace OpenStartScreen
             {
                 Content = stackPanel,
                 Margin = new Thickness(5),
+                Foreground = Brushes.White,
                 Padding = new Thickness(10),
-                Background = Brushes.LightGray,
-                BorderBrush = Brushes.Gray,
+                Background = Brushes.Transparent,
+                BorderBrush = Brushes.Transparent,
                 BorderThickness = new Thickness(1)
             };
 
@@ -371,8 +375,11 @@ namespace OpenStartScreen
             var textBlock = new TextBlock
             {
                 Text = Path.GetFileNameWithoutExtension(file),
+                Foreground = Brushes.White,
+                FontSize = 14,
                 TextWrapping = TextWrapping.Wrap,
                 VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Right,
                 Margin = new Thickness(10, 0, 0, 0) 
             };
 
