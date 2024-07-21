@@ -1,4 +1,4 @@
-﻿<Window x:Class="OpenStartScreen.MainWindow"
+<Window x:Class="OpenStartScreen.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="790" Width="1366">
@@ -19,6 +19,7 @@
         <StackPanel Name="stackPanel">
             <Grid Height="{Binding ElementName=scrollViewer, Path=ViewportHeight}" Background="#180053">
                 <TextBlock Text="Start" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="60" Margin="120,42,0,0" FontWeight="Light" Foreground="White"/>
+                
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,168,0,0">
                     <WrapPanel x:Name="GridsPanel" Orientation="Horizontal" AllowDrop="True" Drop="GridsPanel_Drop" DragOver="GridsPanel_DragOver" />
                 </ScrollViewer>
@@ -43,7 +44,7 @@
 
             <Grid Height="{Binding ElementName=scrollViewer, Path=ViewportHeight}" Background="#180053">
                 <TextBlock Text="Apps" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="60" Margin="120,42,0,0" FontWeight="Light"  Foreground="White"/>
-                <ComboBox x:Name="FilterComboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,120,0,0" Width="200">
+                <ComboBox x:Name="FilterComboBox" FontSize="24" SelectedIndex="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="280,67,0,0" Width="200" Height="46">
                     <ComboBoxItem Content="by name" />
                     <ComboBoxItem Content="by date installed" />
                     <ComboBoxItem Content="by most used" />
