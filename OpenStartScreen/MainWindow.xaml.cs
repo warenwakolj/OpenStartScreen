@@ -421,7 +421,7 @@ namespace OpenStartScreen
                 HorizontalAlignment = HorizontalAlignment.Left
             };
 
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(40) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             var iconGrid = new Grid
@@ -453,7 +453,7 @@ namespace OpenStartScreen
                 FontSize = 14,
                 TextWrapping = TextWrapping.Wrap,
                 VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Right,
+                HorizontalAlignment = HorizontalAlignment.Left,
                 Margin = new Thickness(10, 0, 0, 0)
             };
 
