@@ -21,16 +21,17 @@ namespace OpenStartScreen
         private TimeSpan animationDuration;
 
         public MainWindow()
- {
-        InitializeComponent();
-        LoadStartMenuItems();
-        LoadPinnedItems();
-        this.WindowState = WindowState.Maximized;
-        GridsPanel.AllowDrop = true;
-        GridsPanel.Drop += GridsPanel_Drop;
-        DataContext = new UserCard();  
-        GridsPanel.DragOver += GridsPanel_DragOver;
-    }
+        {
+            InitializeComponent();
+            LoadStartMenuItems();
+            LoadPinnedItems();
+            this.WindowState = WindowState.Maximized;
+            GridsPanel.AllowDrop = true;
+            GridsPanel.Drop += GridsPanel_Drop;
+            DataContext = new UserCard();
+            GridsPanel.DragOver += GridsPanel_DragOver;
+
+        }
 
         private void GoToApps_Click(object sender, RoutedEventArgs e)
         {
@@ -236,6 +237,12 @@ namespace OpenStartScreen
         {
             GridsPanel.Children.Clear();
 
+            var desktopTile = CreateDesktopTile();
+            if (desktopTile != null)
+            {
+                AddTileToGrid(desktopTile);
+            }
+
             var pinnedFiles = Directory.EnumerateFiles(PinnedStartMenuPath, "*.lnk", SearchOption.TopDirectoryOnly);
             foreach (var file in pinnedFiles)
             {
@@ -246,6 +253,59 @@ namespace OpenStartScreen
                 }
             }
         }
+
+        private Tile CreateDesktopTile()
+        {
+            var desktopTile = new Tile
+            {
+                TileName = "Desktop",
+                TileImage = null, 
+                TileBackground = new BitmapImage(new Uri(Environment.ExpandEnvironmentVariables(@"%AppData%\Microsoft\Windows\Themes\CachedFiles\CachedImage_1920_1080_POS4.jpg")))
+            };
+
+            desktopTile.MouseLeftButtonUp += (s, e) => LaunchDesktop();
+            return desktopTile;
+        }
+
+        private void LaunchDesktop()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = "shell:::{3080F90D-D7AD-11D9-BD98-0000947B0257}",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to launch desktop: {ex.Message}");
+            }
+        }
+
+        private Tile CreatePinnedProgramTile(string file)
+        {
+            string targetPath = ShortcutResolver.Resolve(file);
+            if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
+                return null;
+
+            var icon = IconExtractor.Extract(targetPath, 0);
+            var bitmapImage = icon != null ? IconExtractor.ToBitmapSource(icon) : null;
+
+            var tile = new Tile
+            {
+                TileName = Path.GetFileNameWithoutExtension(file),
+                TileImage = bitmapImage,
+                TileBackground = null 
+            };
+
+            tile.MouseRightButtonUp += (s, e) => ShowTileContextMenu(tile, file);
+            tile.MouseLeftButtonUp += (s, e) => LaunchProgram(file);
+
+            return tile;
+        }
+
 
         private void DisplayCategories(Dictionary<string, ProgramCategory> categories)
         {
@@ -347,8 +407,8 @@ namespace OpenStartScreen
                 HorizontalAlignment = HorizontalAlignment.Left
             };
 
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) }); 
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); 
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             var iconGrid = new Grid
             {
@@ -380,7 +440,7 @@ namespace OpenStartScreen
                 TextWrapping = TextWrapping.Wrap,
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(10, 0, 0, 0) 
+                Margin = new Thickness(10, 0, 0, 0)
             };
 
             Grid.SetColumn(iconGrid, 0);
@@ -394,7 +454,7 @@ namespace OpenStartScreen
                 Content = grid,
                 Tag = file,
                 BorderThickness = new Thickness(0),
-                Background = Brushes.Transparent, 
+                Background = Brushes.Transparent,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 BorderBrush = Brushes.Transparent,
                 VerticalAlignment = VerticalAlignment.Top
@@ -410,26 +470,6 @@ namespace OpenStartScreen
             return button;
         }
 
-        private Tile CreatePinnedProgramTile(string file)
-        {
-            string targetPath = ShortcutResolver.Resolve(file);
-            if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
-                return null;
-
-            var icon = IconExtractor.Extract(targetPath, 0);
-            var bitmapImage = icon != null ? IconExtractor.ToBitmapSource(icon) : null;
-
-            var tile = new Tile
-            {
-                TileName = Path.GetFileNameWithoutExtension(file),
-                TileImage = bitmapImage
-            };
-
-            tile.MouseRightButtonUp += (s, e) => ShowTileContextMenu(tile, file);
-            tile.MouseLeftButtonUp += (s, e) => LaunchProgram(file);
-
-            return tile;
-        }
 
         private void ShowTileContextMenu(Tile tile, string filePath)
         {
@@ -509,4 +549,3 @@ namespace OpenStartScreen
         }
     }
 }
-
