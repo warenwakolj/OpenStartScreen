@@ -300,6 +300,8 @@ namespace OpenStartScreen
                 TileBackground = null 
             };
 
+            tile.ResizeTile(126, 126);
+
             tile.MouseRightButtonUp += (s, e) => ShowTileContextMenu(tile, file);
             tile.MouseLeftButtonUp += (s, e) => LaunchProgram(file);
 
