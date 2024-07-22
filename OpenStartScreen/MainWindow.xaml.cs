@@ -262,8 +262,7 @@ namespace OpenStartScreen
             if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
                 return null;
 
-            var icon = IconExtractor.Extract(targetPath, 0);
-            var bitmapImage = icon != null ? IconExtractor.ToBitmapSource(icon) : null;
+            var bitmapImage = IconExtractor.ToBitmapSource(targetPath, 2, true);
 
             var tile = new Tile
             {
@@ -274,6 +273,7 @@ namespace OpenStartScreen
 
             tile.MouseRightButtonUp += (s, e) => ShowTileContextMenu(tile, file);
             tile.MouseLeftButtonUp += (s, e) => LaunchProgram(file);
+            tile.UpdateGradientBrush(bitmapImage);
 
             return tile;
         }
@@ -369,8 +369,7 @@ namespace OpenStartScreen
             if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
                 return null;
 
-            var icon = IconExtractor.Extract(targetPath, 0);
-            var bitmapImage = icon != null ? IconExtractor.ToBitmapSource(icon) : null;
+            var bitmapImage = IconExtractor.ToBitmapSource(targetPath, 2);
 
             var grid = new Grid
             {

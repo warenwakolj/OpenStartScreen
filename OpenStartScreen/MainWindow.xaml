@@ -18,7 +18,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Hidden" Name="scrollViewer">
             <StackPanel Name="stackPanel">
                 <Grid Height="{Binding ElementName=scrollViewer, Path=ViewportHeight}" Background="#180053">
-                    <TextBlock Text="Start" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="60" Margin="120,42,0,0" FontWeight="Light" Foreground="White"/>
+                    <TextBlock Text="Start" TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="60" Margin="120,42,0,0" FontWeight="Light" Foreground="White"/>
                 
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,168,0,0">
                     <WrapPanel x:Name="GridsPanel" Orientation="Horizontal" AllowDrop="True" Drop="GridsPanel_Drop" DragOver="GridsPanel_DragOver"/>

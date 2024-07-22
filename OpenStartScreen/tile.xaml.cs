@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace OpenStartScreen
 {
@@ -23,17 +24,28 @@ namespace OpenStartScreen
             this.MouseLeftButtonDown += Tile_MouseLeftButtonDown;
             this.MouseLeftButtonUp += Tile_MouseLeftButtonUp;
 
-            UpdateGradientBrush();
             SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged;
         }
 
-        private void UpdateGradientBrush()
+        public void UpdateGradientBrush(BitmapSource tileImage = null)
         {
             SolidColorBrush accentBrush = SystemParameters.WindowGlassBrush as SolidColorBrush;
-            if (accentBrush != null)
+            if (accentBrush == null)
             {
                 Color baseColor = accentBrush.Color;
                 Color darkerColor = DarkenColor(baseColor, 0.1);
+
+                var gradientBrush = (LinearGradientBrush)FindResource("TileGradientBrush");
+                if (gradientBrush != null)
+                {
+                    gradientBrush.GradientStops[1].Color = baseColor;
+                    gradientBrush.GradientStops[0].Color = darkerColor;
+                }
+            }
+            else if (tileImage != null)
+            {
+                Color baseColor = (Color)ColorConverter.ConvertFromString(TileColorCalculator.CalculateRightGradient(tileImage, TileName));
+                Color darkerColor = (Color)ColorConverter.ConvertFromString(TileColorCalculator.CalculateLeftGradient(tileImage, TileName));
 
                 var gradientBrush = (LinearGradientBrush)FindResource("TileGradientBrush");
                 if (gradientBrush != null)
