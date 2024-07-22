@@ -21,7 +21,8 @@
                     <TextBlock Text="Start" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="60" Margin="120,42,0,0" FontWeight="Light" Foreground="White"/>
                 
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,168,0,0">
-                    <WrapPanel x:Name="GridsPanel" Orientation="Horizontal" AllowDrop="True" Drop="GridsPanel_Drop" DragOver="GridsPanel_DragOver"/>
+                    <WrapPanel x:Name="GridsPanel" Orientation="Horizontal" AllowDrop="True" Drop="GridsPanel_Drop" DragOver="GridsPanel_DragOver" Margin="120,10,10,10"/>
+
 
                 </ScrollViewer>
                     <Button VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="133,0,0,44" Click="GoToApps_Click" Style="{StaticResource ImageButtonStyle}">

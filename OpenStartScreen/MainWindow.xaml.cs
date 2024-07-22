@@ -109,21 +109,12 @@ namespace OpenStartScreen
             if (lastGrid == null || lastGrid.Children.Count >= lastGrid.Columns * lastGrid.Rows)
             {
                 lastGrid = new UniformGrid { Columns = 2, Rows = 4 };
-
-                if (!isFirstGridAdded)
-                {
-                    lastGrid.Margin = new Thickness(120, 10, 10, 10);
-                    isFirstGridAdded = true;
-                }
-                else
-                {
-                    lastGrid.Margin = new Thickness(10);
-                }
-
+                lastGrid.Margin = new Thickness(10); 
                 GridsPanel.Children.Add(lastGrid);
             }
             lastGrid.Children.Add(tile);
         }
+
 
 
         private void LoadStartMenuItems()
