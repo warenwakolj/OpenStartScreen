@@ -11,6 +11,8 @@ using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Security.Principal;
+using System.Runtime.InteropServices;
+using System.Text;
 
 
 namespace OpenStartScreen
@@ -20,6 +22,8 @@ namespace OpenStartScreen
         private double targetVerticalOffset;
         private DateTime animationStartTime;
         private TimeSpan animationDuration;
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern int SystemParametersInfo(int uAction, int uParam, StringBuilder lpvParam, int fuWinIni);
 
         public MainWindow()
         {
@@ -30,6 +34,16 @@ namespace OpenStartScreen
             GridsPanel.AllowDrop = true;
             DataContext = new UserCard();
 
+        }
+
+        private const int SPI_GETDESKWALLPAPER = 0x0073;
+        private const int MAX_PATH = 260;
+
+        private string GetWallpaperPath()
+        {
+            var wallpaperPath = new StringBuilder(MAX_PATH);
+            SystemParametersInfo(SPI_GETDESKWALLPAPER, MAX_PATH, wallpaperPath, 0);
+            return wallpaperPath.ToString();
         }
 
         private void GoToApps_Click(object sender, RoutedEventArgs e)
@@ -218,7 +232,7 @@ namespace OpenStartScreen
             {
                 TileName = "Desktop",
                 TileImage = null, 
-                TileBackground = new BitmapImage(new Uri(Environment.ExpandEnvironmentVariables(@"%AppData%\Microsoft\Windows\Themes\CachedFiles\CachedImage_1920_1080_POS4.jpg")))
+                TileBackground = new BitmapImage(new Uri(GetWallpaperPath()))
             };
 
             desktopTile.MouseLeftButtonUp += (s, e) => LaunchDesktop();
