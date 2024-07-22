@@ -13,12 +13,15 @@ using System.Windows.Media.Imaging;
 using System.Security.Principal;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Media.Media3D;
 
 
 namespace OpenStartScreen
 {
     public partial class MainWindow : Window
     {
+        private bool isZoomedOut = false;
+        private ScaleTransform scaleTransform;
         private double targetVerticalOffset;
         private DateTime animationStartTime;
         private TimeSpan animationDuration;
@@ -34,7 +37,73 @@ namespace OpenStartScreen
             GridsPanel.AllowDrop = true;
             DataContext = new UserCard();
 
+            scaleTransform = new ScaleTransform(1.0, 1.0);
+            var translateTransform = new TranslateTransform();
+            var transformGroup = new TransformGroup();
+            transformGroup.Children.Add(scaleTransform);
+            transformGroup.Children.Add(translateTransform);
+
+            GridsPanel.LayoutTransform = transformGroup;
+            this.KeyDown += MainWindow_KeyDown;
         }
+
+
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Z)
+            {
+                ToggleZoom();
+            }
+        }
+
+    private void ToggleZoom()
+{
+    double newScale = isZoomedOut ? 1.0 : 0.3;
+    var transformGroup = (TransformGroup)GridsPanel.LayoutTransform;
+    var scaleTransform = (ScaleTransform)transformGroup.Children[0];
+    var translateTransform = (TranslateTransform)transformGroup.Children[1];
+
+    DoubleAnimation scaleXAnimation = new DoubleAnimation
+    {
+        To = newScale,
+        Duration = TimeSpan.FromSeconds(0.2),
+        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+    };
+
+    DoubleAnimation scaleYAnimation = new DoubleAnimation
+    {
+        To = newScale,
+        Duration = TimeSpan.FromSeconds(0.2),
+        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+    };
+
+    scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleXAnimation);
+    scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleYAnimation);
+
+    double translateX = isZoomedOut ? 0 : (GridsPanel.ActualWidth * (1 - newScale)) / 2;
+    double translateY = isZoomedOut ? 0 : (GridsPanel.ActualHeight * (1 - newScale)) / 2;
+
+    DoubleAnimation translateXAnimation = new DoubleAnimation
+    {
+        To = translateX,
+        Duration = TimeSpan.FromSeconds(0.2),
+        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+    };
+
+    DoubleAnimation translateYAnimation = new DoubleAnimation
+    {
+        To = translateY,
+        Duration = TimeSpan.FromSeconds(0.2),
+        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+    };
+
+    translateTransform.BeginAnimation(TranslateTransform.XProperty, translateXAnimation);
+    translateTransform.BeginAnimation(TranslateTransform.YProperty, translateYAnimation);
+
+    isZoomedOut = !isZoomedOut;
+}
+
 
         private const int SPI_GETDESKWALLPAPER = 0x0073;
         private const int MAX_PATH = 260;
