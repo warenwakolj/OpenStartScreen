@@ -479,8 +479,24 @@ namespace OpenStartScreen
             unpinMenuItem.Click += (s, e) => UnpinFromStartMenu(filePath);
             contextMenu.Items.Add(unpinMenuItem);
 
+            var sizeMenuItem = new MenuItem { Header = "Resize" };
+            contextMenu.Items.Add(sizeMenuItem);
+
+            var size1x1 = new MenuItem { Header = "Small (1x1)" };
+            size1x1.Click += (s, e) => tile.ResizeTile(126, 126);
+            sizeMenuItem.Items.Add(size1x1);
+
+            var size1x2 = new MenuItem { Header = "Medium (2x1)" };
+            size1x2.Click += (s, e) => tile.ResizeTile(252, 126);
+            sizeMenuItem.Items.Add(size1x2);
+
+            var size2x2 = new MenuItem { Header = "Large (2x2)" };
+            size2x2.Click += (s, e) => tile.ResizeTile(252, 252);
+            sizeMenuItem.Items.Add(size2x2);
+
             contextMenu.IsOpen = true;
         }
+
 
         private void LaunchProgram(string filePath)
         {

@@ -16,6 +16,12 @@ namespace OpenStartScreen
         public static readonly DependencyProperty TileBackgroundProperty =
             DependencyProperty.Register("TileBackground", typeof(ImageSource), typeof(Tile), new PropertyMetadata(null));
 
+        public static readonly DependencyProperty TileWidthProperty =
+            DependencyProperty.Register("TileWidth", typeof(double), typeof(Tile), new PropertyMetadata(126.0));
+
+        public static readonly DependencyProperty TileHeightProperty =
+            DependencyProperty.Register("TileHeight", typeof(double), typeof(Tile), new PropertyMetadata(126.0));
+
         public Tile()
         {
             InitializeComponent();
@@ -70,6 +76,18 @@ namespace OpenStartScreen
             set => SetValue(TileBackgroundProperty, value);
         }
 
+        public double TileWidth
+        {
+            get => (double)GetValue(TileWidthProperty);
+            set => SetValue(TileWidthProperty, value);
+        }
+
+        public double TileHeight
+        {
+            get => (double)GetValue(TileHeightProperty);
+            set => SetValue(TileHeightProperty, value);
+        }
+
         private bool isDragging = false;
         private Point startPoint;
 
@@ -110,6 +128,14 @@ namespace OpenStartScreen
             {
                 UpdateGradientBrush();
             }
+        }
+
+        public void ResizeTile(double width, double height)
+        {
+            TileWidth = width;
+            TileHeight = height;
+            this.Width = width;
+            this.Height = height;
         }
     }
 }
