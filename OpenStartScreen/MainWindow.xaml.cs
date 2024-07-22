@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Security.Principal;
 
+
 namespace OpenStartScreen
 {
     public partial class MainWindow : Window
@@ -27,9 +28,7 @@ namespace OpenStartScreen
             LoadPinnedItems();
             this.WindowState = WindowState.Maximized;
             GridsPanel.AllowDrop = true;
-            GridsPanel.Drop += GridsPanel_Drop;
             DataContext = new UserCard();
-            GridsPanel.DragOver += GridsPanel_DragOver;
 
         }
 
@@ -73,90 +72,6 @@ namespace OpenStartScreen
         private const string StartMenuPath = @"C:\ProgramData\Microsoft\Windows\Start Menu\Programs";
         private static string PinnedStartMenuPath = Environment.ExpandEnvironmentVariables(@"%AppData%\Microsoft\Internet Explorer\Quick Launch\User Pinned\StartMenu");
 
-        private void GridsPanel_Drop(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(typeof(Tile)))
-            {
-                Tile tile = e.Data.GetData(typeof(Tile)) as Tile;
-
-                if (tile != null)
-                {
-                    UniformGrid parentGrid = FindParent<UniformGrid>(tile);
-                    if (parentGrid != null)
-                    {
-                        parentGrid.Children.Remove(tile);
-                    }
-
-                    Point dropPosition = e.GetPosition(GridsPanel);
-                    bool addedToExistingGrid = false;
-
-                    foreach (UniformGrid grid in GridsPanel.Children)
-                    {
-                        Rect bounds = VisualTreeHelper.GetDescendantBounds(grid);
-                        Point topLeft = grid.TranslatePoint(new Point(0, 0), GridsPanel);
-
-                        if (dropPosition.X >= topLeft.X && dropPosition.X <= topLeft.X + bounds.Width &&
-                            dropPosition.Y >= topLeft.Y && dropPosition.Y <= topLeft.Y + bounds.Height)
-                        {
-                            grid.Children.Add(tile);
-                            addedToExistingGrid = true;
-                            break;
-                        }
-                    }
-
-                    if (!addedToExistingGrid)
-                    {
-                        UniformGrid newGrid = new UniformGrid { Columns = 2, Rows = 4, Margin = new Thickness(10) };
-
-                        GridsPanel.Children.Add(newGrid);
-                        newGrid.Children.Add(tile);
-                    }
-                }
-            }
-        }
-
-        private void GridsPanel_DragOver(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(typeof(Tile)))
-            {
-                e.Effects = DragDropEffects.Move;
-            }
-            else
-            {
-                e.Effects = DragDropEffects.None;
-            }
-            e.Handled = true;
-        }
-
-
-        private void PlaceNewGrid(Point dropPosition, UniformGrid newGrid)
-        {
-            double x = dropPosition.X;
-            double y = dropPosition.Y;
-            double maxWidth = 0;
-            double maxHeight = 0;
-
-            foreach (UniformGrid grid in GridsPanel.Children)
-            {
-                Rect bounds = VisualTreeHelper.GetDescendantBounds(grid);
-                Point topLeft = grid.TranslatePoint(new Point(0, 0), GridsPanel);
-                maxWidth = Math.Max(maxWidth, topLeft.X + bounds.Width);
-                maxHeight = Math.Max(maxHeight, topLeft.Y + bounds.Height);
-            }
-
-            if (x > maxWidth)
-            {
-                newGrid.Margin = new Thickness(maxWidth + 10, 0, 0, 0);
-            }
-            else if (y > maxHeight)
-            {
-                newGrid.Margin = new Thickness(0, maxHeight + 10, 0, 0);
-            }
-            else
-            {
-                newGrid.Margin = new Thickness(x, y, 0, 0);
-            }
-        }
 
 
 
@@ -251,6 +166,49 @@ namespace OpenStartScreen
                 {
                     AddTileToGrid(tile);
                 }
+            }
+        }
+
+        private void GridsPanel_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(Tile)))
+            {
+                Tile droppedTile = e.Data.GetData(typeof(Tile)) as Tile;
+                if (droppedTile != null)
+                {
+                    Point dropPosition = e.GetPosition(GridsPanel);
+                    HitTestResult hitTestResult = VisualTreeHelper.HitTest(GridsPanel, dropPosition);
+                    if (hitTestResult != null)
+                    {
+                        Tile targetTile = FindParent<Tile>(hitTestResult.VisualHit);
+                        if (targetTile != null && !ReferenceEquals(droppedTile, targetTile))
+                        {
+                            UniformGrid sourceGrid = FindParent<UniformGrid>(droppedTile);
+                            UniformGrid targetGrid = FindParent<UniformGrid>(targetTile);
+
+                            if (sourceGrid != null && targetGrid != null)
+                            {
+                                int sourceIndex = sourceGrid.Children.IndexOf(droppedTile);
+                                int targetIndex = targetGrid.Children.IndexOf(targetTile);
+
+                                sourceGrid.Children.RemoveAt(sourceIndex);
+                                targetGrid.Children.Insert(targetIndex, droppedTile);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+           private void GridsPanel_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(Tile)))
+            {
+                e.Effects = DragDropEffects.Move;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
             }
         }
 
