@@ -9,7 +9,7 @@
 ## Features to add
 
 - **MAKE IT REPLACE THE NORMAL START MENU**
- - 2x1 and 2x2 tile sizes
+ - 2x1 and 2x2 tile sizes (wip)
  - Allow more customizable tile placement
  - Live Tiles implementation (either custom or imported from uwp app)
  - Smoother animations
