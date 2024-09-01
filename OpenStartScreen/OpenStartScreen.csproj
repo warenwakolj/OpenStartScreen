@@ -43,4 +43,8 @@
     <Resource Include="Up.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="OpenStartScreen\" />
+  </ItemGroup>
+
 </Project>
