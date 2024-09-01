@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace OpenStartScreen
 {
@@ -16,15 +17,23 @@ namespace OpenStartScreen
         public static readonly DependencyProperty TileBackgroundProperty =
             DependencyProperty.Register("TileBackground", typeof(ImageSource), typeof(Tile), new PropertyMetadata(null));
 
+        public static readonly DependencyProperty TileSizeProperty =
+            DependencyProperty.Register("TileSize", typeof(TileSize), typeof(Tile), new PropertyMetadata(TileSize.Default));
+
         public Tile()
         {
             InitializeComponent();
-            this.MouseMove += Tile_MouseMove;
-            this.MouseLeftButtonDown += Tile_MouseLeftButtonDown;
-            this.MouseLeftButtonUp += Tile_MouseLeftButtonUp;
-
             UpdateGradientBrush();
-            SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged;
+
+            this.MouseMove += Tile_MouseMove;
+        }
+
+        private void Tile_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragDrop.DoDragDrop(this, this, DragDropEffects.Move);
+            }
         }
 
         private void UpdateGradientBrush()
@@ -70,46 +79,49 @@ namespace OpenStartScreen
             set => SetValue(TileBackgroundProperty, value);
         }
 
-        private bool isDragging = false;
-        private Point startPoint;
-
-        private void Tile_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        public TileSize TileSize
         {
-            startPoint = e.GetPosition(null);
-            isDragging = true;
+            get => (TileSize)GetValue(TileSizeProperty);
+            set => SetValue(TileSizeProperty, value);
         }
 
-        private void Tile_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        public double ImageSize => TileSize == TileSize.Large ? 72 : 44;
+
+        private static void OnTileSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (isDragging)
+            if (d is Tile tile)
             {
-                isDragging = false;
+                tile.UpdateSize();
             }
         }
 
-        private void Tile_MouseMove(object sender, MouseEventArgs e)
+        private void UpdateSize()
         {
-            if (isDragging && e.LeftButton == MouseButtonState.Pressed)
+            UpdateGradientBrush();
+            switch (TileSize)
             {
-                Point currentPosition = e.GetPosition(null);
-
-                if (Math.Abs(currentPosition.X - startPoint.X) > SystemParameters.MinimumHorizontalDragDistance ||
-                    Math.Abs(currentPosition.Y - startPoint.Y) > SystemParameters.MinimumVerticalDragDistance)
-                {
-                    isDragging = false;
-
-                    DataObject data = new DataObject(typeof(Tile), this);
-                    DragDrop.DoDragDrop(this, data, DragDropEffects.Move);
-                }
+                case TileSize.Default:
+                    Width = 124;
+                    Height = 124;
+                    break;
+                case TileSize.Wide:
+                    Width = 248;
+                    Height = 124;
+                    break;
+                case TileSize.Large:
+                    Width = 248;
+                    Height = 248;
+                    break;
             }
         }
+    }
 
-        private void SystemParameters_StaticPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(SystemParameters.WindowGlassBrush))
-            {
-                UpdateGradientBrush();
-            }
-        }
+
+
+    public enum TileSize
+    {
+        Default,
+        Wide,
+        Large
     }
 }

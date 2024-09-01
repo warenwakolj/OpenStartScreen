@@ -45,6 +45,9 @@ namespace OpenStartScreen
 
             GridsPanel.LayoutTransform = transformGroup;
             this.KeyDown += MainWindow_KeyDown;
+
+            GridsPanel.Drop += GridsPanel_Drop;
+            GridsPanel.DragOver += GridsPanel_DragOver;
         }
 
 
@@ -57,52 +60,52 @@ namespace OpenStartScreen
             }
         }
 
-    private void ToggleZoom()
-{
-    double newScale = isZoomedOut ? 1.0 : 0.3;
-    var transformGroup = (TransformGroup)GridsPanel.LayoutTransform;
-    var scaleTransform = (ScaleTransform)transformGroup.Children[0];
-    var translateTransform = (TranslateTransform)transformGroup.Children[1];
+        private void ToggleZoom()
+        {
+            double newScale = isZoomedOut ? 1.0 : 0.3;
+            var transformGroup = (TransformGroup)GridsPanel.LayoutTransform;
+            var scaleTransform = (ScaleTransform)transformGroup.Children[0];
+            var translateTransform = (TranslateTransform)transformGroup.Children[1];
 
-    DoubleAnimation scaleXAnimation = new DoubleAnimation
-    {
-        To = newScale,
-        Duration = TimeSpan.FromSeconds(0.2),
-        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
-    };
+            DoubleAnimation scaleXAnimation = new DoubleAnimation
+            {
+                To = newScale,
+                Duration = TimeSpan.FromSeconds(0.2),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
 
-    DoubleAnimation scaleYAnimation = new DoubleAnimation
-    {
-        To = newScale,
-        Duration = TimeSpan.FromSeconds(0.2),
-        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
-    };
+            DoubleAnimation scaleYAnimation = new DoubleAnimation
+            {
+                To = newScale,
+                Duration = TimeSpan.FromSeconds(0.2),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
 
-    scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleXAnimation);
-    scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleYAnimation);
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleXAnimation);
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleYAnimation);
 
-    double translateX = isZoomedOut ? 0 : (GridsPanel.ActualWidth * (1 - newScale)) / 2;
-    double translateY = isZoomedOut ? 0 : (GridsPanel.ActualHeight * (1 - newScale)) / 2;
+            double translateX = isZoomedOut ? 0 : (GridsPanel.ActualWidth * (1 - newScale)) / 2;
+            double translateY = isZoomedOut ? 0 : (GridsPanel.ActualHeight * (1 - newScale)) / 2;
 
-    DoubleAnimation translateXAnimation = new DoubleAnimation
-    {
-        To = translateX,
-        Duration = TimeSpan.FromSeconds(0.2),
-        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
-    };
+            DoubleAnimation translateXAnimation = new DoubleAnimation
+            {
+                To = translateX,
+                Duration = TimeSpan.FromSeconds(0.2),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
 
-    DoubleAnimation translateYAnimation = new DoubleAnimation
-    {
-        To = translateY,
-        Duration = TimeSpan.FromSeconds(0.2),
-        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
-    };
+            DoubleAnimation translateYAnimation = new DoubleAnimation
+            {
+                To = translateY,
+                Duration = TimeSpan.FromSeconds(0.2),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
 
-    translateTransform.BeginAnimation(TranslateTransform.XProperty, translateXAnimation);
-    translateTransform.BeginAnimation(TranslateTransform.YProperty, translateYAnimation);
+            translateTransform.BeginAnimation(TranslateTransform.XProperty, translateXAnimation);
+            translateTransform.BeginAnimation(TranslateTransform.YProperty, translateYAnimation);
 
-    isZoomedOut = !isZoomedOut;
-}
+            isZoomedOut = !isZoomedOut;
+        }
 
 
         private const int SPI_GETDESKWALLPAPER = 0x0073;
@@ -172,18 +175,6 @@ namespace OpenStartScreen
 
         private bool isFirstGridAdded = false;
 
-        private void AddTileToGrid(Tile tile)
-        {
-            UniformGrid lastGrid = GridsPanel.Children.OfType<UniformGrid>().LastOrDefault();
-            if (lastGrid == null || lastGrid.Children.Count >= lastGrid.Columns * lastGrid.Rows)
-            {
-                lastGrid = new UniformGrid { Columns = 2, Rows = 4 };
-                lastGrid.Margin = new Thickness(10); 
-                GridsPanel.Children.Add(lastGrid);
-            }
-            lastGrid.Children.Add(tile);
-        }
-
 
 
         private void LoadStartMenuItems()
@@ -225,22 +216,85 @@ namespace OpenStartScreen
         private void LoadPinnedItems()
         {
             GridsPanel.Children.Clear();
+            _allTiles.Clear();
 
-            var desktopTile = CreateDesktopTile();
-            if (desktopTile != null)
+            var desktopTileInfo = CreateDesktopTileInfo();
+            if (desktopTileInfo != null)
             {
-                AddTileToGrid(desktopTile);
+                desktopTileInfo.Tile = CreateTile(desktopTileInfo);
+                _allTiles.Add(desktopTileInfo);
             }
 
             var pinnedFiles = Directory.EnumerateFiles(PinnedStartMenuPath, "*.lnk", SearchOption.TopDirectoryOnly);
             foreach (var file in pinnedFiles)
             {
-                var tile = CreatePinnedProgramTile(file);
-                if (tile != null)
+                var tileInfo = CreatePinnedProgramTileInfo(file);
+                if (tileInfo != null)
                 {
-                    AddTileToGrid(tile);
+                    tileInfo.Tile = CreateTile(tileInfo);
+                    _allTiles.Add(tileInfo);
                 }
             }
+
+            ReorganizeTiles();
+        }
+
+
+
+        private Tile CreateTile(TileInfo tileInfo)
+        {
+            var tile = new Tile
+            {
+                TileName = tileInfo.Name,
+                TileImage = tileInfo.Image,
+                TileBackground = tileInfo.Background,
+                TileSize = tileInfo.Size
+            };
+
+            tile.MouseRightButtonUp += (s, e) => ShowTileContextMenu(tile, tileInfo.FilePath);
+            tile.MouseLeftButtonUp += (s, e) => LaunchProgram(tileInfo.FilePath);
+
+            // Make the tile draggable
+            tile.MouseMove += (s, e) =>
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    DragDrop.DoDragDrop(tile, tile, DragDropEffects.Move);
+                }
+            };
+
+            return tile;
+        }
+
+        private TileInfo CreateDesktopTileInfo()
+        {
+            return new TileInfo
+            {
+                Name = "Desktop",
+                Image = null,
+                Background = new BitmapImage(new Uri(GetWallpaperPath())),
+                FilePath = "explorer.exe",
+                Size = TileSize.Default
+            };
+        }
+
+        private TileInfo CreatePinnedProgramTileInfo(string file)
+        {
+            string targetPath = ShortcutResolver.Resolve(file);
+            if (string.IsNullOrEmpty(targetPath) || !File.Exists(targetPath))
+                return null;
+
+            var icon = IconExtractor.Extract(targetPath, 0);
+            var bitmapImage = icon != null ? IconExtractor.ToBitmapSource(icon) : null;
+
+            return new TileInfo
+            {
+                Name = Path.GetFileNameWithoutExtension(file),
+                Image = bitmapImage,
+                Background = null,
+                FilePath = file,
+                Size = TileSize.Default
+            };
         }
 
         private void GridsPanel_Drop(object sender, DragEventArgs e)
@@ -257,24 +311,31 @@ namespace OpenStartScreen
                         Tile targetTile = FindParent<Tile>(hitTestResult.VisualHit);
                         if (targetTile != null && !ReferenceEquals(droppedTile, targetTile))
                         {
-                            UniformGrid sourceGrid = FindParent<UniformGrid>(droppedTile);
-                            UniformGrid targetGrid = FindParent<UniformGrid>(targetTile);
-
-                            if (sourceGrid != null && targetGrid != null)
-                            {
-                                int sourceIndex = sourceGrid.Children.IndexOf(droppedTile);
-                                int targetIndex = targetGrid.Children.IndexOf(targetTile);
-
-                                sourceGrid.Children.RemoveAt(sourceIndex);
-                                targetGrid.Children.Insert(targetIndex, droppedTile);
-                            }
+                            MoveTile(droppedTile, targetTile);
                         }
                     }
                 }
             }
         }
 
-           private void GridsPanel_DragOver(object sender, DragEventArgs e)
+        private void MoveTile(Tile sourceTile, Tile targetTile)
+        {
+            var sourceTileInfo = _allTiles.FirstOrDefault(t => t.Name == sourceTile.TileName);
+            var targetTileInfo = _allTiles.FirstOrDefault(t => t.Name == targetTile.TileName);
+
+            if (sourceTileInfo != null && targetTileInfo != null)
+            {
+                int sourceIndex = _allTiles.IndexOf(sourceTileInfo);
+                int targetIndex = _allTiles.IndexOf(targetTileInfo);
+
+                _allTiles.RemoveAt(sourceIndex);
+                _allTiles.Insert(targetIndex, sourceTileInfo);
+
+                ReorganizeTiles();
+            }
+        }
+
+        private void GridsPanel_DragOver(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(typeof(Tile)))
             {
@@ -284,6 +345,7 @@ namespace OpenStartScreen
             {
                 e.Effects = DragDropEffects.None;
             }
+            e.Handled = true;
         }
 
         private Tile CreateDesktopTile()
@@ -291,7 +353,7 @@ namespace OpenStartScreen
             var desktopTile = new Tile
             {
                 TileName = "Desktop",
-                TileImage = null, 
+                TileImage = null,
                 TileBackground = new BitmapImage(new Uri(GetWallpaperPath()))
             };
 
@@ -329,7 +391,7 @@ namespace OpenStartScreen
             {
                 TileName = Path.GetFileNameWithoutExtension(file),
                 TileImage = bitmapImage,
-                TileBackground = null 
+                TileBackground = null
             };
 
             tile.MouseRightButtonUp += (s, e) => ShowTileContextMenu(tile, file);
@@ -511,7 +573,215 @@ namespace OpenStartScreen
             unpinMenuItem.Click += (s, e) => UnpinFromStartMenu(filePath);
             contextMenu.Items.Add(unpinMenuItem);
 
+            var sizeMenu = new MenuItem { Header = "Resize" };
+            sizeMenu.Items.Add(CreateSizeMenuItem("Small", TileSize.Default, tile, filePath));
+            sizeMenu.Items.Add(CreateSizeMenuItem("Wide", TileSize.Wide, tile, filePath));
+            sizeMenu.Items.Add(CreateSizeMenuItem("Large", TileSize.Large, tile, filePath));
+            contextMenu.Items.Add(sizeMenu);
+
             contextMenu.IsOpen = true;
+        }
+
+        private MenuItem CreateSizeMenuItem(string header, TileSize size, Tile tile, string filePath)
+        {
+            var menuItem = new MenuItem { Header = header };
+            menuItem.Click += (s, e) =>
+            {
+                var tileInfo = _allTiles.FirstOrDefault(t => t.FilePath == filePath);
+                if (tileInfo != null)
+                {
+                    tileInfo.Size = size;
+                    tile.TileSize = size;
+                    ReorganizeTiles();
+                }
+            };
+            return menuItem;
+        }
+
+        private void ReorganizeTiles()
+        {
+            GridsPanel.Children.Clear();
+
+            var stackPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal
+            };
+
+            var currentGrid = CreateNewGrid();
+            var occupiedCells = new List<List<bool>> { new List<bool> { false, false, false, false } };
+
+            foreach (var tileInfo in _allTiles)
+            {
+                var tile = CreateTile(tileInfo);
+
+                int columnSpan = 1;
+                int rowSpan = 1;
+
+                switch (tile.TileSize)
+                {
+                    case TileSize.Default:
+                        tile.Width = 124;
+                        tile.Height = 124;
+                        break;
+                    case TileSize.Wide:
+                        tile.Width = 248;
+                        tile.Height = 124;
+                        columnSpan = 2;
+                        break;
+                    case TileSize.Large:
+                        tile.Width = 248;
+                        tile.Height = 248;
+                        columnSpan = 2;
+                        rowSpan = 2;
+                        break;
+                }
+
+                int row = 0;
+                int col = -1;
+
+                while (col == -1)
+                {
+                    col = FindNextAvailableColumn(occupiedCells, row, columnSpan, rowSpan);
+                    if (col == -1)
+                    {
+                        row++;
+                        if (row >= occupiedCells.Count)
+                        {
+                            occupiedCells.Add(new List<bool> { false, false, false, false });
+                            currentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(124) });
+                        }
+                    }
+                }
+
+                if (row >= 4)
+                {
+                    stackPanel.Children.Add(currentGrid);
+                    currentGrid = CreateNewGrid();
+                    occupiedCells = new List<List<bool>> { new List<bool> { false, false, false, false } };
+                    row = 0;
+                    col = 0;
+                }
+
+                Grid.SetRow(tile, row);
+                Grid.SetColumn(tile, col);
+                Grid.SetColumnSpan(tile, columnSpan);
+                Grid.SetRowSpan(tile, rowSpan);
+
+                for (int r = 0; r < rowSpan; r++)
+                {
+                    while (row + r >= occupiedCells.Count)
+                    {
+                        occupiedCells.Add(new List<bool> { false, false, false, false });
+                        currentGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(124) });
+                    }
+                    for (int c = 0; c < columnSpan; c++)
+                    {
+                        occupiedCells[row + r][col + c] = true;
+                    }
+                }
+
+                currentGrid.Children.Add(tile);
+            }
+
+            stackPanel.Children.Add(currentGrid);
+
+            var scrollViewer = new ScrollViewer
+            {
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                Content = stackPanel,
+                MaxHeight = 500
+            };
+
+            scrollViewer.HorizontalAlignment = HorizontalAlignment.Left;
+
+            var scrollViewerContainer = new Grid
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            scrollViewerContainer.Children.Add(scrollViewer);
+
+            GridsPanel.Children.Add(scrollViewerContainer);
+
+            GridsPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+        }
+
+        private Grid CreateNewGrid()
+        {
+            var grid = new Grid();
+            for (int i = 0; i < 4; i++)
+            {
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(124) });
+                grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(124) });
+            }
+            return grid;
+        }
+
+
+
+        private int FindNextAvailableColumn(List<List<bool>> occupiedCells, int row, int columnSpan, int rowSpan)
+        {
+            for (int col = 0; col <= 4 - columnSpan; col++)
+            {
+                bool isAvailable = true;
+                for (int r = 0; r < rowSpan; r++)
+                {
+                    if (row + r >= occupiedCells.Count)
+                    {
+                        continue;
+                    }
+                    for (int c = 0; c < columnSpan; c++)
+                    {
+                        if (occupiedCells[row + r][col + c])
+                        {
+                            isAvailable = false;
+                            break;
+                        }
+                    }
+                    if (!isAvailable) break;
+                }
+                if (isAvailable) return col;
+            }
+            return -1;
+        }
+
+
+
+        private List<TileInfo> _allTiles = new List<TileInfo>();
+        private void AddTileToGrid(Tile tile)
+        {
+            UniformGrid lastGrid = GridsPanel.Children.OfType<UniformGrid>().LastOrDefault();
+            if (lastGrid == null || !CanFitTile(lastGrid, tile))
+            {
+                lastGrid = new UniformGrid { Columns = 2, Rows = 4 };
+                lastGrid.Margin = new Thickness(10);
+                GridsPanel.Children.Add(lastGrid);
+            }
+
+            lastGrid.Children.Add(tile);
+        }
+
+        private bool CanFitTile(UniformGrid grid, Tile tile)
+        {
+            int occupiedCells = grid.Children.Cast<Tile>().Sum(t => GetTileOccupiedCells(t));
+            int newTileCells = GetTileOccupiedCells(tile);
+            return occupiedCells + newTileCells <= grid.Columns * grid.Rows;
+        }
+
+
+        private int GetTileOccupiedCells(Tile tile)
+        {
+            switch (tile.TileSize)
+            {
+                case TileSize.Default:
+                    return 1;
+                case TileSize.Wide:
+                    return 2;
+                case TileSize.Large:
+                    return 4;
+                default:
+                    return 1;
+            }
         }
 
         private void LaunchProgram(string filePath)
@@ -578,6 +848,16 @@ namespace OpenStartScreen
                     MessageBox.Show($"Failed to start program: {ex.Message}");
                 }
             }
+        }
+
+        public class TileInfo
+        {
+            public string Name { get; set; }
+            public ImageSource Image { get; set; }
+            public ImageSource Background { get; set; }
+            public string FilePath { get; set; }
+            public TileSize Size { get; set; }
+            public Tile Tile { get; set; }
         }
     }
 }
