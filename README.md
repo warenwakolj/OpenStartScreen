@@ -1,4 +1,4 @@
-### There will be no compiled builds until I am satisfied enough with the quality
+### Probably too much technical debt, ill restart working on this from scratch
 
 # OpenStartScreen
 
